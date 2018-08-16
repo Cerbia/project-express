@@ -26,17 +26,25 @@ app.get('/', function(req, res) {
 
 app.post('/updateNote/:note', function(req, res) {
 
-    stringifyFile += req.params.note;
-    
-    fs.writeFile('./test.json', stringifyFile , function(err) {
-
+    fs.readFile('./test.json', 'utf-8', function(err, data) {
         if (err) {
             throw err;
         }
-        console.log('File updated');
-    });
+        stringifyFile = data;
 
-    res.send('Identyfikator, który został dopisany to ' + req.params.note);
+        stringifyFile += req.params.note;
+
+        fs.writeFile('./test.json', stringifyFile , function(err) {
+
+            if (err) {
+                throw err;
+            }
+            console.log('File updated');
+            res.send(stringifyFile);
+        });
+
+    });
+    //res.send('Identyfikator, który został dopisany to ' + req.params.note);
 });
 
 app.delete('/del_user', function(req, res) {

@@ -6,6 +6,7 @@ var app = express();
 var stringifyFile = '';
 
 app.use(bodyParser.json());
+app.use(express.static('assets'));
 
 app.get('/getNote', function(req, res) {
     console.log('Otrzymałem żądanie GET do strony /getNote');
@@ -21,7 +22,15 @@ app.get('/getNote', function(req, res) {
 
 app.get('/', function(req, res) {
     console.log('Otrzymałem żądanie GET do strony głównej');
-    res.send('Hello GET!');
+    res.sendFile('/index.html');
+});
+
+app.get('/userform', function(req, res) {
+    var response = {
+        first_name: req.query.first_name,
+        last_name: req.query.last_name
+    }
+    res.end(JSON.stringify(response));
 });
 
 app.post('/updateNote/:note', function(req, res) {
@@ -52,7 +61,12 @@ app.delete('/del_user', function(req, res) {
     res.send('Hello DELETE!');
 });
 
-app.listen(3000);
+var server = app.listen(3000, 'localhost', function() {
+    var host = server.address().address;
+    var port = server.address().port;
+
+    console.log('Przykładowa aplikacja nasłuchuje na http://' + host + ':' + port);
+});
 
 app.use(function(req,res,next) {
     res.status(404).send('Wybacz, nie mogliśmy odnaleźć tego, czego żądasz!');

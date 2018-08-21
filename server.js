@@ -5,8 +5,19 @@ var app = express();
 
 var stringifyFile = '';
 
+app.set('view engine', 'pug');
+app.set('views', './views');
+
 app.use(bodyParser.json());
 app.use(express.static('assets'));
+
+app.get('/', function(req, res) {
+    res.render('dynamic', {
+        //user: { name: "Johnny", age: "20" },
+        name: "Moja dynamiczna strona",
+        url: "http://www.google.com"
+    });
+});
 
 app.use('/store', function(req, res, next) {
     console.log('Hej, jestem pośrednikiem między żądaniem a odpowiedzią!');
@@ -25,10 +36,18 @@ app.get('/getNote', function(req, res) {
     });
 });
 
+/*
 app.get('/', function(req, res) {
     console.log('Otrzymałem żądanie GET do strony głównej');
     res.sendFile('/index.html');
 });
+*/
+
+app.get('/auth/google', function(req, res) {
+    res.render('first-template');
+});
+
+
 
 app.get('/store', function(req, res) {
     console.log('go to store');

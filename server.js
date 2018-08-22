@@ -1,23 +1,82 @@
 var express = require('express');
+var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var config = require('./config');
+var app = express();
+var googleProfile = {};
+
+
 var bodyParser = require('body-parser')
 var fs = require('fs');
-var app = express();
-
 var stringifyFile = '';
 
 app.set('view engine', 'pug');
 app.set('views', './views');
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+    done(null, obj);
+});
+
+passport.use(new GoogleStrategy({
+        clientID: config.GOOGLE_CLIENT_ID,
+        clientSecret:config.GOOGLE_CLIENT_SECRET,
+        callbackURL: config.CALLBACK_URL
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        console.log(profile);
+        googleProfile = {
+            id: profile.id,
+            displayName: profile.displayName,
+            imageUrl: profile._json.image.url,
+            email: profile.emails[0].value
+        };
+        cb(null, profile);
+    }
+));
 
 app.use(bodyParser.json());
 app.use(express.static('assets'));
 
+//app routes
 app.get('/', function(req, res) {
-    res.render('dynamic', {
+    res.render('index', {
         //user: { name: "Johnny", age: "20" },
         name: "Moja dynamiczna strona",
         url: "http://www.google.com"
     });
 });
+
+app.get('/logged', function(req, res){
+    //console.log(googleProfile);
+    res.render('logged', { user: googleProfile });
+
+});
+
+
+app.get('/auth/google', passport.authenticate(
+    'google',
+    {
+        scope: ['profile', 'email']
+    }
+));
+
+app.get('/auth/google/callback', passport.authenticate(
+    'google',
+    {
+        successRedirect: '/logged',
+        failureRedirect: '/'
+    }
+));
+
+
+
+//-------------------------------------
 
 app.use('/store', function(req, res, next) {
     console.log('Hej, jestem pośrednikiem między żądaniem a odpowiedzią!');
@@ -42,12 +101,6 @@ app.get('/', function(req, res) {
     res.sendFile('/index.html');
 });
 */
-
-app.get('/auth/google', function(req, res) {
-    res.render('first-template');
-});
-
-
 
 app.get('/store', function(req, res) {
     console.log('go to store');
@@ -92,16 +145,13 @@ app.delete('/del_user', function(req, res) {
 
 //app.listen(3000);
 
+
 var server = app.listen(3000, 'localhost', function() {
     var host = server.address().address;
     var port = server.address().port;
     console.log('Przykładowa aplikacja nasłuchuje na http://' + host + ':' + port);
 });
 
-
-
 app.use(function(req,res,next) {
     res.status(404).send('Wybacz, nie mogliśmy odnaleźć tego, czego żądasz!');
 });
-
-

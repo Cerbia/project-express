@@ -1,0 +1,10 @@
+doctype html
+html(lang='pl')
+    head
+        title My super app
+    body
+        h1 Login to my super app
+        #container
+            form(action='/auth/google')
+                input(type='submit', value='Login with Google')
+        //include ./footer.pug

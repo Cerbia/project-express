@@ -1,0 +1,11 @@
+doctype html
+html
+	head
+		title="Hello PUG"
+	body
+		div.container.column.main#division(width="100",height="100")
+			p.greetings#people I'm logged in with Google!
+			p Hello  #{user.displayName}
+			img(src=user.imageUrl, alt='Image from Google profile', width='100', height='100')
+			p email #{user.email}
+		//oooo
